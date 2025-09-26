@@ -1,35 +1,69 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Suspense, useState } from "react";
 
-function App() {
-  const [count, setCount] = useState(0)
+import "./app.css";
 
+import AvailablePlayers from "./components/AvailablePlayers/AvailablePlayers";
+import Navbar from "./components/Navbar/Navbar";
+import SelectedPlayers from "./components/SelectedPlayers/SelectedPlayers";
+
+const fetchPlayers = async () => {
+  const res = await fetch("/players.json");
+  return res.json();
+};
+
+const App = () => {
+  const playersPromise = fetchPlayers();
+
+  const [toggle, setToggle] = useState(true);
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      {/* navbar */}
+      <Navbar></Navbar>
+      <div className="max-w-[1200px] mx-auto">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-center my-4">
+            Available Players
+          </h1>
+          <div className="">
+            <button
+              className={`border border-r-0 py-3 px-4 rounded-l-xl  font-semibold${
+                toggle === true ? " bg-[#E7FE29] text-black " : "text-whate"
+              }`}
+              onClick={() => setToggle(true)}
+            >
+              Available
+            </button>
+            <button
+              className={`border border-l-0 py-3 px-4 rounded-r-xl font-semibold ${
+                toggle === false ? " bg-[#E7FE29] text-black" : "text-white"
+              } `}
+              onClick={() => setToggle(false)}
+            >
+              <span>Selected</span>
+              <span className="ml-1">(0)</span>
+            </button>
+          </div>
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
 
-export default App
+      {/* main content */}
+      <main className="max-w-[1200px] mx-auto pt-6">
+        {toggle === true ? (
+          <Suspense
+            fallback={
+              <span className="loading loading-spinner loading-lg"></span>
+            }
+          >
+            <AvailablePlayers
+              playersPromise={playersPromise}
+            ></AvailablePlayers>
+          </Suspense>
+        ) : (
+          <SelectedPlayers></SelectedPlayers>
+        )}
+      </main>
+    </>
+  );
+};
+
+export default App;
